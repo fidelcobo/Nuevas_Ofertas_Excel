@@ -2,87 +2,32 @@ import openpyxl
 import csv
 import os
 from PyQt5 import QtWidgets
-from datetime import datetime
+from constantes import FIRST_ROW
+from listas import list_manufacturer
+# from datetime import datetime
 import locale
 
 locale.setlocale(locale.LC_ALL, 'FR')
 
 
-def clasificar_articulos(lista_articulos, instance):
-    # Este procedimiento toma la lista de artículos y los reparte en listas particularizadas para cada fabricante
+def fill_offer(lista_articulos, carpeta, bid, instance):
 
-    lista_checkpoint = [p
-                        for p in lista_articulos
-                        if p.manufacturer == 'Checkpoint']
-    instance.lista_checkpoint = lista_checkpoint
-
-    lista_fortinet = [p
-                      for p in lista_articulos
-                      if p.manufacturer == 'Fortinet']
-    instance.lista_fortinet = lista_fortinet
-
-    lista_hp = [p
-                for p in lista_articulos
-                if p.manufacturer == 'HP']
-    instance.lista_hp = lista_hp
-
-    lista_f5 = [p
-                for p in lista_articulos
-                if p.manufacturer == 'F5 Networks']
-    instance.lista_f5 = lista_f5
-
-    lista_cisco = [p
-                   for p in lista_articulos
-                   if p.manufacturer == 'CISCO']
-    instance.lista_cisco = lista_cisco
-
-    lista_alcatel = [p
-                     for p in lista_articulos
-                     if p.manufacturer == 'Alcatel']
-    instance.lista_alcatel = lista_alcatel
-
-    lista_aruba = [p
-                   for p in lista_articulos
-                   if p.manufacturer == 'Aruba']
-    instance.lista_aruba = lista_aruba
-
-    lista_paloalto = [p
-                      for p in lista_articulos
-                      if p.manufacturer == 'Palo Alto Networks']
-    instance.lista_paloalto = lista_paloalto
-
-    lista_juniper = [p
-                     for p in lista_articulos
-                     if p.manufacturer == 'Juniper']
-    instance.lista_juniper = lista_juniper
-
-    lista_bluecoat = [p
-                      for p in lista_articulos
-                      if p.manufacturer == 'Bluecoat']
-    instance.lista_bluecoat = lista_bluecoat
-
-    lista_brocade = [p
-                     for p in lista_articulos
-                     if p.manufacturer == 'Brocade']
-    instance.lista_brocade = lista_brocade
+    """
+    :param lista_arrticulos:
+    :param carpeta:
+    :param instance:
+    :return: No devuelve valores, sino que compone los csv de la oferta
+    Este procedimiento clasifica los artículos por fabricante y compone los ficheros csv de salida
+    """
+    for fabr in list_manufacturer:
+        lista_fabr =  [p
+                       for p in lista_articulos
+                       if p.manufacturer == fabr]
+        hacer_oferta_csv(fabr, lista_fabr, carpeta, bid, instance)
 
 
-def hacer_oferta(directorio, instance):
+def hacer_oferta_csv(fabr, lista, directorio, bid, instance):
 
-    oferta_productos('Checkpoint', instance.lista_checkpoint, directorio, instance)
-    oferta_productos('Fortinet', instance.lista_fortinet, directorio, instance)
-    oferta_productos('F5', instance.lista_f5, directorio, instance)
-    oferta_productos('HP', instance.lista_hp, directorio, instance)
-    oferta_productos('Aruba', instance.lista_aruba, directorio, instance)
-    oferta_productos('Palo Alto Networks', instance.lista_paloalto, directorio, instance)
-    oferta_productos('Brocade', instance.lista_brocade, directorio, instance)
-    oferta_productos('Juniper', instance.lista_juniper, directorio, instance)
-    oferta_productos('Bluecoat', instance.lista_bluecoat, directorio, instance)
-    oferta_productos('Alcatel', instance.lista_alcatel, directorio, instance)
-    oferta_productos('CISCO', instance.lista_cisco, directorio, instance)
-
-
-def oferta_productos(fabr, lista, directorio, instance):
     if lista:
         curr_row = 2
         num_fila = 10
@@ -169,8 +114,8 @@ def oferta_productos(fabr, lista, directorio, instance):
             curr_row += 1
             num_fila += 10
 
-        nombre_fichero_salida_exc = 'productos_' + fabr + '.xlsx'
-        nombre_fichero_salida_csv = 'productos_' + fabr + '.csv'
+        nombre_fichero_salida_exc = str(bid) + '_'+ fabr + '.xlsx'
+        nombre_fichero_salida_csv = str(bid) + '_'+ fabr +  '.csv'
 
         fichero_salida_excel = os.path.join(directorio, nombre_fichero_salida_exc)
         fichero_salida_csv = os.path.join(directorio, nombre_fichero_salida_csv)
@@ -188,24 +133,6 @@ def oferta_productos(fabr, lista, directorio, instance):
 
         csv_from_excel(fichero_salida_excel, fichero_salida_csv, instance)
         os.remove(fichero_salida_excel)  # Quitamos el fichero auxiliar Excel
-
-# def hacer_oferta_ms(lista_articulos, directorio, instance):
-#
-#     # En primer lugar filtramos los registros que incluyen mantenimiento
-#
-#     lista_ms = [item
-#                 for item in lista_articulos
-#                 if item.manten == 'Sí']
-#
-#     excel_aux = pass_to_excel(lista_ms, instance)
-#     fichero_excel_out = os.path.join(directorio, 'ms.xlsx')
-#     fichero_csv_out = os.path.join(directorio, 'ms.csv')
-#
-#     if excel_aux:
-#
-#         excel_aux.save(fichero_excel_out)
-#         csv_from_excel(fichero_excel_out, fichero_csv_out)
-#         os.remove(fichero_excel_out)
 
 
 def csv_from_excel(entrada, salida, instance):
@@ -237,88 +164,6 @@ def csv_from_excel(entrada, salida, instance):
                                               'por favor ciérrelo y pulse Aceptar'.format(salida))
 
 
-def pass_to_excel(lista: [], instance):
-
-    actual_dir = os.path.dirname(__file__)
-
-    # Ahora abrimos el fichero Excel auxiliar de plantilla de MS
-    filen = os.path.join(actual_dir, 'plantilla.xlsx')  # Este fichero no se toca. Hace de plantilla
-    sheet_name = 'ms'
-    if not os.path.exists(filen):
-        instance.QtWidgets.QMessageBox.critical(instance, 'Procesado de oferta',
-                                                'El fichero {} no se encuentra\n'.format(filen))
-        return None
-
-    try:
-        libro = openpyxl.load_workbook(filen)
-        hoja = libro.get_sheet_by_name(sheet_name)
-
-    except PermissionError:
-        instance.QtWidgets.QMessageBox.critical(instance, 'Procesado de oferta',
-                                               'Fichero Excel {} no se puede abrir\n'
-                                               'Compruebe que no está ya abierto'.format(filen))
-
-        return None
-
-    curr_row = 2
-    num_fila = 10
-
-    for reg in lista:
-        fila = str(curr_row)
-        fila_sig = str(curr_row + 1)
-
-        hoja['A' + fila] = num_fila
-        hoja['A' + fila_sig] = num_fila + 1
-        hoja['B' + fila_sig] = num_fila
-        hoja['H' + fila] = 2
-        hoja['H' + fila_sig] = 20
-        hoja['C' + fila] = 'Dimension Data'
-        hoja['C' + fila_sig] = reg.manufacturer
-        hoja['E' + fila] = reg.unit
-        hoja['E' + fila_sig] = reg.unit
-        hoja['F' + fila] = reg.sku_uptime
-        hoja['F' + fila_sig] = reg.backout_name
-        hoja['G' + fila] = reg.descr_uptime
-        hoja['G' + fila_sig] = reg.code
-        hoja['I' + fila] = reg.code
-        hoja['I' + fila_sig] = 0
-        hoja['J' + fila] = reg.manufacturer
-        hoja['J' + fila_sig] = ''
-        hoja['K' + fila] = 1
-        hoja['K' + fila_sig] = 1
-        hoja['L' + fila] = 'EA'
-        hoja['L' + fila_sig] = 'EA'
-        hoja['M' + fila] = 'EUR'
-        hoja['M' + fila_sig] = 'EUR'
-        hoja['N' + fila] = 'Fixed'
-        hoja['N' + fila_sig] = 'Fixed'
-        hoja['O' + fila] = reg.list_price_back
-        hoja['O' + fila_sig] = reg.list_price_back
-        hoja['P' + fila] = locale.format('%10.2f', float(reg.venta_mant))
-        hoja['P' + fila_sig] = locale.format('%10.2f', (1.2 * float(reg.coste_unit_back)))
-        hoja['Q' + fila] = locale.format('%10.2f', float(reg.cost_unit_manten))
-        hoja['Q' + fila_sig] = locale.format('%10.2f', float(reg.coste_unit_back))
-        fecha_init = '{}/{}/{}'.format(reg.init_date.day, reg.init_date.month, reg.init_date.year)
-        fecha_init_limpia = '{}{}{}'.format(str(reg.init_date.year), str(reg.init_date.month).zfill(2),
-                                            str(reg.init_date.day).zfill(2))
-        fecha_fin = '{}/{}/{}'.format(reg.end_date.day, reg.end_date.month, reg.end_date.year)
-        hoja['X' + fila] = fecha_init
-        hoja['X' + fila_sig] = fecha_init
-        hoja['Y' + fila] = fecha_fin
-        hoja['Y' + fila_sig] = fecha_fin
-        hoja['AA' + fila] = ('StartDate=' + fecha_init_limpia + '#Duration=' + str(reg.durac) +
-                            '#InvoiceInterval=Yearly#InvoiceMode=anticipated')
-        hoja['AA' + fila_sig] = ('StartDate=' + fecha_init_limpia + '#Duration=' + str(reg.durac) +
-                            '#InvoiceInterval=Yearly#InvoiceMode=anticipated')
-
-        hoja['AF' + fila] = reg.tech
-        hoja['AF' + fila_sig] = reg.tech
-        curr_row += 2
-        num_fila += 3
-
-    return libro
-
-
 def busca_columnas(sheet: object, lista_busca: list, fila_busca: str) -> object:
 
     columnas = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T',
@@ -341,7 +186,7 @@ def busca_columnas(sheet: object, lista_busca: list, fila_busca: str) -> object:
 
 
 def get_ultima_fila(hoja, col_code):
-    fila = 11
+    fila = FIRST_ROW
     fin = False
     while not fin:
         cell = col_code + str(fila)
@@ -351,3 +196,179 @@ def get_ultima_fila(hoja, col_code):
             fila += 1
             fin = False
     return (fila-1)
+
+# AQUÍ VAN LOS PROCEDIMIENTOS QUE SE HAN RETIRADO Y SUSTITUIDO POR OTROS MÁS EFICIENTES
+# def clasificar_articulos(lista_articulos, instance):
+#     # Este procedimiento toma la lista de artículos y los reparte en listas particularizadas para cada fabricante
+#
+#     lista_checkpoint = [p
+#                         for p in lista_articulos
+#                         if p.manufacturer == 'Checkpoint']
+#     instance.lista_checkpoint = lista_checkpoint
+#
+#     lista_fortinet = [p
+#                       for p in lista_articulos
+#                       if p.manufacturer == 'Fortinet']
+#     instance.lista_fortinet = lista_fortinet
+#
+#     lista_hp = [p
+#                 for p in lista_articulos
+#                 if p.manufacturer == 'HP']
+#     instance.lista_hp = lista_hp
+#
+#     lista_f5 = [p
+#                 for p in lista_articulos
+#                 if p.manufacturer == 'F5 Networks']
+#     instance.lista_f5 = lista_f5
+#
+#     lista_cisco = [p
+#                    for p in lista_articulos
+#                    if p.manufacturer == 'CISCO']
+#     instance.lista_cisco = lista_cisco
+#
+#     lista_alcatel = [p
+#                      for p in lista_articulos
+#                      if p.manufacturer == 'Alcatel']
+#     instance.lista_alcatel = lista_alcatel
+#
+#     lista_aruba = [p
+#                    for p in lista_articulos
+#                    if p.manufacturer == 'Aruba']
+#     instance.lista_aruba = lista_aruba
+#
+#     lista_paloalto = [p
+#                       for p in lista_articulos
+#                       if p.manufacturer == 'Palo Alto Networks']
+#     instance.lista_paloalto = lista_paloalto
+#
+#     lista_juniper = [p
+#                      for p in lista_articulos
+#                      if p.manufacturer == 'Juniper']
+#     instance.lista_juniper = lista_juniper
+#
+#     lista_bluecoat = [p
+#                       for p in lista_articulos
+#                       if p.manufacturer == 'Bluecoat']
+#     instance.lista_bluecoat = lista_bluecoat
+#
+#     lista_brocade = [p
+#                      for p in lista_articulos
+#                      if p.manufacturer == 'Brocade']
+#     instance.lista_brocade = lista_brocade
+
+
+# def hacer_oferta(directorio, instance):
+#
+#     oferta_productos('Checkpoint', instance.lista_checkpoint, directorio, instance)
+#     oferta_productos('Fortinet', instance.lista_fortinet, directorio, instance)
+#     oferta_productos('F5', instance.lista_f5, directorio, instance)
+#     oferta_productos('HP', instance.lista_hp, directorio, instance)
+#     oferta_productos('Aruba', instance.lista_aruba, directorio, instance)
+#     oferta_productos('Palo Alto Networks', instance.lista_paloalto, directorio, instance)
+#     oferta_productos('Brocade', instance.lista_brocade, directorio, instance)
+#     oferta_productos('Juniper', instance.lista_juniper, directorio, instance)
+#     oferta_productos('Bluecoat', instance.lista_bluecoat, directorio, instance)
+#     oferta_productos('Alcatel', instance.lista_alcatel, directorio, instance)
+#     oferta_productos('CISCO', instance.lista_cisco, directorio, instance)
+
+
+
+# def hacer_oferta_ms(lista_articulos, directorio, instance):
+#
+#     # En primer lugar filtramos los registros que incluyen mantenimiento
+#
+#     lista_ms = [item
+#                 for item in lista_articulos
+#                 if item.manten == 'Sí']
+#
+#     excel_aux = pass_to_excel(lista_ms, instance)
+#     fichero_excel_out = os.path.join(directorio, 'ms.xlsx')
+#     fichero_csv_out = os.path.join(directorio, 'ms.csv')
+#
+#     if excel_aux:
+#
+#         excel_aux.save(fichero_excel_out)
+#         csv_from_excel(fichero_excel_out, fichero_csv_out)
+#         os.remove(fichero_excel_out)
+
+
+# def pass_to_excel(lista: [], instance):
+#
+#     actual_dir = os.path.dirname(__file__)
+#
+#     # Ahora abrimos el fichero Excel auxiliar de plantilla de MS
+#     filen = os.path.join(actual_dir, 'plantilla.xlsx')  # Este fichero no se toca. Hace de plantilla
+#     sheet_name = 'ms'
+#     if not os.path.exists(filen):
+#         instance.QtWidgets.QMessageBox.critical(instance, 'Procesado de oferta',
+#                                                 'El fichero {} no se encuentra\n'.format(filen))
+#         return None
+#
+#     try:
+#         libro = openpyxl.load_workbook(filen)
+#         hoja = libro.get_sheet_by_name(sheet_name)
+#
+#     except PermissionError:
+#         instance.QtWidgets.QMessageBox.critical(instance, 'Procesado de oferta',
+#                                                'Fichero Excel {} no se puede abrir\n'
+#                                                'Compruebe que no está ya abierto'.format(filen))
+#
+#         return None
+#
+#     curr_row = 2
+#     num_fila = 10
+#
+#     for reg in lista:
+#         fila = str(curr_row)
+#         fila_sig = str(curr_row + 1)
+#
+#         hoja['A' + fila] = num_fila
+#         hoja['A' + fila_sig] = num_fila + 1
+#         hoja['B' + fila_sig] = num_fila
+#         hoja['H' + fila] = 2
+#         hoja['H' + fila_sig] = 20
+#         hoja['C' + fila] = 'Dimension Data'
+#         hoja['C' + fila_sig] = reg.manufacturer
+#         hoja['E' + fila] = reg.unit
+#         hoja['E' + fila_sig] = reg.unit
+#         hoja['F' + fila] = reg.sku_uptime
+#         hoja['F' + fila_sig] = reg.backout_name
+#         hoja['G' + fila] = reg.descr_uptime
+#         hoja['G' + fila_sig] = reg.code
+#         hoja['I' + fila] = reg.code
+#         hoja['I' + fila_sig] = 0
+#         hoja['J' + fila] = reg.manufacturer
+#         hoja['J' + fila_sig] = ''
+#         hoja['K' + fila] = 1
+#         hoja['K' + fila_sig] = 1
+#         hoja['L' + fila] = 'EA'
+#         hoja['L' + fila_sig] = 'EA'
+#         hoja['M' + fila] = 'EUR'
+#         hoja['M' + fila_sig] = 'EUR'
+#         hoja['N' + fila] = 'Fixed'
+#         hoja['N' + fila_sig] = 'Fixed'
+#         hoja['O' + fila] = reg.list_price_back
+#         hoja['O' + fila_sig] = reg.list_price_back
+#         hoja['P' + fila] = locale.format('%10.2f', float(reg.venta_mant))
+#         hoja['P' + fila_sig] = locale.format('%10.2f', (1.2 * float(reg.coste_unit_back)))
+#         hoja['Q' + fila] = locale.format('%10.2f', float(reg.cost_unit_manten))
+#         hoja['Q' + fila_sig] = locale.format('%10.2f', float(reg.coste_unit_back))
+#         fecha_init = '{}/{}/{}'.format(reg.init_date.day, reg.init_date.month, reg.init_date.year)
+#         fecha_init_limpia = '{}{}{}'.format(str(reg.init_date.year), str(reg.init_date.month).zfill(2),
+#                                             str(reg.init_date.day).zfill(2))
+#         fecha_fin = '{}/{}/{}'.format(reg.end_date.day, reg.end_date.month, reg.end_date.year)
+#         hoja['X' + fila] = fecha_init
+#         hoja['X' + fila_sig] = fecha_init
+#         hoja['Y' + fila] = fecha_fin
+#         hoja['Y' + fila_sig] = fecha_fin
+#         hoja['AA' + fila] = ('StartDate=' + fecha_init_limpia + '#Duration=' + str(reg.durac) +
+#                             '#InvoiceInterval=Yearly#InvoiceMode=anticipated')
+#         hoja['AA' + fila_sig] = ('StartDate=' + fecha_init_limpia + '#Duration=' + str(reg.durac) +
+#                             '#InvoiceInterval=Yearly#InvoiceMode=anticipated')
+#
+#         hoja['AF' + fila] = reg.tech
+#         hoja['AF' + fila_sig] = reg.tech
+#         curr_row += 2
+#         num_fila += 3
+#
+#     return libro

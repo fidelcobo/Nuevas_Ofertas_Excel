@@ -1,7 +1,8 @@
 from PyQt5 import QtWidgets
 from Classes.offer_screen import Ui_Dialog
 from Classes.articulo import Articulo
-from auxiliar import get_ultima_fila, busca_columnas, clasificar_articulos, hacer_oferta
+from constantes import HEADERS_ROW, FIRST_ROW, BID_CELL
+from auxiliar import get_ultima_fila, busca_columnas, fill_offer
 
 import openpyxl
 import os
@@ -41,16 +42,16 @@ class Offer(QtWidgets.QDialog, Ui_Dialog):
         """
         Abre el fichero de oferta y extrae los datos en una lista de objetos Articulo
         :param file_offer:
-        :return: lista_articulos .Lista de objetos clase Articulo
+        :return: lista_articulos .Lista de objetos clase Articulo, bid: Nombre de la oferta
         """
         try:
             libro_oferta = openpyxl.load_workbook(file_offer, data_only=True)
-            sheet = libro_oferta.get_sheet_by_name('Detalle')
+            sheet = libro_oferta.get_sheet_by_name('Product and SS Costs')
 
         except:
             QtWidgets.QMessageBox.critical(self, "Error",
                                            "Imposible abrir fichero de oferta")
-            return None
+            return None, None
 
         lista_busqueda = ['Unid', 'Tech', 'Manufacturer', 'Part Number real (*)', 'Coste de producto',
                           'Venta de producto', '¿Mantenimiento?', 'Fecha inicio',
@@ -59,11 +60,12 @@ class Offer(QtWidgets.QDialog, Ui_Dialog):
                           'Coste Backout Unitario (EUR) - ANUAL','Uplift', 'Coste anual mantenimiento(EUR)',
                           'Margen mantenimiento', 'Venta mantenimiento (EUR)', 'Descripción', 'Precio_lista']
 
-        headers_row = str(10)
-        first_row = str(11)
+        headers_row = str(HEADERS_ROW)
+        first_row = str(FIRST_ROW)
 
         ok, lista_columnas = busca_columnas(sheet, lista_busqueda, headers_row)
         lista_articulos = []
+        bid = ''
 
         if ok:
             unid_col, tech_col, manuf_col, code_col, cost_prod_col, venta_prod_col = lista_columnas[0:6]
@@ -100,13 +102,13 @@ class Offer(QtWidgets.QDialog, Ui_Dialog):
                                                      venta_prod, manten, init_date, end_date, durac, uptime_cod,
                                                      descr_upt, back_name, list_back, cost_back, uplift, cost_mant,
                                                      margen_mant, venta_mant))
-                pass
+                bid = sheet[BID_CELL].value
         else:
             QtWidgets.QMessageBox.critical(self, "Error", "El fichero de oferta tiene formato incorrecto \n "
                                                  "Por favor, seleccione otro")
-            return
+            return None, None
 
-        return lista_articulos
+        return lista_articulos, bid
 
     def procesar_oferta(self):
 
@@ -115,13 +117,14 @@ class Offer(QtWidgets.QDialog, Ui_Dialog):
 
         if file_offer:
 
-            lista_items = self.extraer_articulos(file_offer)
+            lista_items, bid = self.extraer_articulos(file_offer)
             if not lista_items:
                 return
 
-            clasificar_articulos(lista_items, self)
-            hacer_oferta(offer_dir, self)
+            # clasificar_articulos(lista_items, self)
+            # hacer_oferta(offer_dir, self)
             # hacer_oferta_ms(lista_items, offer_dir, self)
+            fill_offer(lista_items, offer_dir, bid, self)
             QtWidgets.QMessageBox.information(self, "OK", "Parece que todo ha ido bien. "
                                                     "\n Ficheros de oferta generados")
         else:

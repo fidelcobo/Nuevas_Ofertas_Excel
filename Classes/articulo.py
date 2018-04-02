@@ -5,7 +5,7 @@ class Articulo:
                  sku_uptime='', descr_uptime='', backout_name='', list_price_back=0.0,
                  coste_unit_back=0.0, uplift=0.0, cost_unit_manten=0.0, margen_mant=0.0, venta_mant=0.0):
 
-        self.unit = int(unit)
+        self.unit = unit
         self.tech = tech
         self.manufacturer = manufacturer
         self.code = code
