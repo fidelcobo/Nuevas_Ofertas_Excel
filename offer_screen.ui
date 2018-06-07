@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>424</width>
-    <height>285</height>
+    <height>321</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@ background-color: qconicalgradient(cx:0.8125, cy:0.761, angle:0, stop:0 rgba(191
    <property name="geometry">
     <rect>
      <x>160</x>
-     <y>200</y>
+     <y>230</y>
      <width>91</width>
      <height>51</height>
     </rect>
@@ -67,7 +67,7 @@ background-color: qconicalgradient(cx:0.8125, cy:0.761, angle:0, stop:0 rgba(191
    <property name="geometry">
     <rect>
      <x>30</x>
-     <y>140</y>
+     <y>170</y>
      <width>321</width>
      <height>31</height>
     </rect>
@@ -90,7 +90,7 @@ background-color: qconicalgradient(cx:0.8125, cy:0.761, angle:0, stop:0 rgba(191
    <property name="geometry">
     <rect>
      <x>360</x>
-     <y>140</y>
+     <y>170</y>
      <width>31</width>
      <height>31</height>
     </rect>
@@ -142,7 +142,7 @@ background-color: qconicalgradient(cx:0.8125, cy:0.761, angle:0, stop:0 rgba(191
    <property name="geometry">
     <rect>
      <x>39</x>
-     <y>200</y>
+     <y>230</y>
      <width>101</width>
      <height>41</height>
     </rect>
@@ -162,10 +162,31 @@ background-color: qconicalgradient(cx:0.8125, cy:0.761, angle:0, stop:0 rgba(191
    <property name="geometry">
     <rect>
      <x>260</x>
-     <y>200</y>
+     <y>230</y>
      <width>101</width>
      <height>41</height>
     </rect>
+   </property>
+  </widget>
+  <widget class="QRadioButton" name="solo_mantenimiento">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>130</y>
+     <width>171</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <italic>true</italic>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color:rgb(170, 0, 0)</string>
+   </property>
+   <property name="text">
+    <string>Procesar sólo mantenimientos</string>
    </property>
   </widget>
  </widget>

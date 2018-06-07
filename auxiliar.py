@@ -10,7 +10,7 @@ import locale
 locale.setlocale(locale.LC_ALL, 'FR')
 
 
-def fill_offer(lista_articulos, carpeta, bid, instance):
+def fill_offer(lista_articulos, carpeta, bid, only_maint, moneda, instance):
 
     """
     :param lista_arrticulos:
@@ -19,14 +19,18 @@ def fill_offer(lista_articulos, carpeta, bid, instance):
     :return: No devuelve valores, sino que compone los csv de la oferta
     Este procedimiento clasifica los artículos por fabricante y compone los ficheros csv de salida
     """
+    if only_maint:  # Sólo mantenimientos en un fichero único
+        hacer_oferta_csv('Mantenimiento', lista_articulos, carpeta, bid, only_maint, moneda, instance )
+        return
+
     for fabr in list_manufacturer:
         lista_fabr =  [p
                        for p in lista_articulos
                        if p.manufacturer == fabr]
-        hacer_oferta_csv(fabr, lista_fabr, carpeta, bid, instance)
+        hacer_oferta_csv(fabr, lista_fabr, carpeta, bid, only_maint, moneda, instance)
 
 
-def hacer_oferta_csv(fabr, lista, directorio, bid, instance):
+def hacer_oferta_csv(fabr:str, lista:list, directorio, bid:str, only_maint, moneda, instance):
 
     if lista:
         curr_row = 2
@@ -38,80 +42,86 @@ def hacer_oferta_csv(fabr, lista, directorio, bid, instance):
         hoja = libro.get_active_sheet()
 
         for items in lista:
-            fila = str(curr_row)
-            hoja['A' + fila] = num_fila
-            hoja['C' + fila] = items.manufacturer
-            hoja['H' + fila] = 1
-            hoja['L' + fila] = 'EA'
-            hoja['M' + fila] = 'EUR'
-            hoja['N' + fila] = 'Fixed'
-            hoja['F' + fila] = items.code
-            hoja['G' + fila] = items.descripcion_prod
-            hoja['K' + fila] = items.unit
-            if items.list_price:
-                hoja['O' + fila] = items.list_price
-            else:
-                hoja['O' + fila] = 0
-            hoja['Q' + fila] = locale.format('%10.2f', items.coste_prod)
-            hoja['P' + fila] = locale.format('%10.2f', items.venta_prod)
-            hoja['AF' + fila] = items.tech
-
-            if items.maintenance:  # El ítem tiene mantenimiento. Añadir las dos lineas correspondientes
-                fila = str(curr_row + 1)
-                fila_sig = str(curr_row + 2)
-
-                hoja['A' + fila] = num_fila + 1
-                hoja['A' + fila_sig] = num_fila + 2
-                hoja['B' + fila_sig] = num_fila + 1
-                hoja['H' + fila] = 2
-                hoja['H' + fila_sig] = 20
-                hoja['C' + fila] = 'Dimension Data'
-                hoja['C' + fila_sig] = items.manufacturer
-                hoja['E' + fila] = items.unit
-                hoja['E' + fila_sig] = items.unit
-                hoja['F' + fila] = items.sku_uptime
-                hoja['F' + fila_sig] = items.backout_name
-                hoja['G' + fila] = items.descr_uptime
-                hoja['G' + fila_sig] = items.code
-                hoja['I' + fila] = items.code
-                hoja['I' + fila_sig] = 0
-                hoja['J' + fila] = items.manufacturer
-                hoja['J' + fila_sig] = ''
-                hoja['K' + fila] = 1
-                hoja['K' + fila_sig] = 1
+            if not only_maint:
+                fila = str(curr_row)
+                hoja['A' + fila] = num_fila
+                hoja['C' + fila] = items.manufacturer
+                hoja['H' + fila] = 1
                 hoja['L' + fila] = 'EA'
-                hoja['L' + fila_sig] = 'EA'
-                hoja['M' + fila] = 'EUR'
-                hoja['M' + fila_sig] = 'EUR'
+                hoja['M' + fila] = moneda
                 hoja['N' + fila] = 'Fixed'
-                hoja['N' + fila_sig] = 'Fixed'
-                hoja['O' + fila] = items.list_price_back
-                hoja['O' + fila_sig] = items.list_price_back
-                hoja['P' + fila] = locale.format('%10.2f', float(items.venta_mant * items.durac))
-                hoja['P' + fila_sig] = locale.format('%10.2f', float(items.venta_mant * items.durac))
-                hoja['Q' + fila] = locale.format('%10.2f', float(items.cost_unit_manten * items.durac))
-                hoja['Q' + fila_sig] = locale.format('%10.2f', float(items.coste_unit_back * items.durac))
-                fecha_init = '{}/{}/{}'.format(items.init_date.day, items.init_date.month,
-                                               items.init_date.year)
-                fecha_init_limpia = '{}{}{}'.format(str(items.init_date.year),
-                                                    str(items.init_date.month).zfill(2),
-                                                    str(items.init_date.day).zfill(2))
-                fecha_fin = '{}/{}/{}'.format(items.end_date.day, items.end_date.month,
-                                              items.end_date.year)
-                hoja['X' + fila] = fecha_init
-                hoja['X' + fila_sig] = fecha_init
-                hoja['Y' + fila] = fecha_fin
-                hoja['Y' + fila_sig] = fecha_fin
-                hoja['AA' + fila] = ('StartDate=' + fecha_init_limpia + '#Duration=' + str(items.durac*12) +
-                                     '#InvoiceInterval=Yearly#InvoiceMode=anticipated')
-                hoja['AA' + fila_sig] = ('StartDate=' + fecha_init_limpia + '#Duration=' + str(items.durac*12) +
-                                         '#InvoiceInterval=Yearly#InvoiceMode=anticipated')
-
+                hoja['F' + fila] = items.code
+                hoja['G' + fila] = items.descripcion_prod
+                hoja['K' + fila] = items.unit
+                if items.list_price:
+                    hoja['O' + fila] = locale.format('%10.2f', items.list_price)
+                else:
+                    hoja['O' + fila] = 0
+                hoja['Q' + fila] = locale.format('%10.2f', items.coste_prod)
+                hoja['P' + fila] = locale.format('%10.2f', items.venta_prod)
                 hoja['AF' + fila] = items.tech
-                hoja['AF' + fila_sig] = items.tech
-                curr_row += 2
+                if items.maintenance:  # El ítem tiene mantenimiento. Añadir las dos lineas correspondientes
+                    fila = str(curr_row + 1)
+                    fila_sig = str(curr_row + 2)
+            else:
+                fila = str(curr_row)
+                fila_sig = str(curr_row + 1)
 
-            curr_row += 1
+            hoja['A' + fila] = num_fila + 1
+            hoja['A' + fila_sig] = num_fila + 2
+            hoja['B' + fila_sig] = num_fila + 1
+            hoja['H' + fila] = 2
+            hoja['H' + fila_sig] = 20
+            hoja['C' + fila] = 'Dimension Data'
+            hoja['C' + fila_sig] = items.manufacturer
+            hoja['E' + fila] = items.unit
+            hoja['E' + fila_sig] = items.unit
+            hoja['F' + fila] = items.sku_uptime
+            hoja['F' + fila_sig] = items.backout_name
+            hoja['G' + fila] = items.descr_uptime
+            hoja['G' + fila_sig] = items.code
+            hoja['I' + fila] = items.code
+            hoja['I' + fila_sig] = 0
+            hoja['J' + fila] = items.manufacturer
+            hoja['J' + fila_sig] = ''
+            hoja['K' + fila] = 1
+            hoja['K' + fila_sig] = 1
+            hoja['L' + fila] = 'EA'
+            hoja['L' + fila_sig] = 'EA'
+            hoja['M' + fila] = moneda
+            hoja['M' + fila_sig] = moneda
+            hoja['N' + fila] = 'Fixed'
+            hoja['N' + fila_sig] = 'Fixed'
+            hoja['O' + fila] = locale.format('%10.2f',items.list_price_back)
+            hoja['O' + fila_sig] = locale.format('%10.2f',items.list_price_back)
+            hoja['P' + fila] = locale.format('%10.2f', float(items.venta_mant * items.durac/12))
+            hoja['P' + fila_sig] = locale.format('%10.2f', items.list_price_back)
+            hoja['Q' + fila] = locale.format('%10.2f', float(items.cost_unit_manten * items.durac/12))
+            hoja['Q' + fila_sig] = locale.format('%10.2f', float(items.coste_unit_back * items.durac/12))
+            fecha_init = '{}/{}/{}'.format(items.init_date.day, items.init_date.month,
+                                           items.init_date.year)
+            fecha_init_limpia = '{}{}{}'.format(str(items.init_date.year),
+                                                str(items.init_date.month).zfill(2),
+                                                str(items.init_date.day).zfill(2))
+            fecha_fin = '{}/{}/{}'.format(items.end_date.day, items.end_date.month,
+                                          items.end_date.year)
+            hoja['X' + fila] = fecha_init
+            hoja['X' + fila_sig] = fecha_init
+            hoja['Y' + fila] = fecha_fin
+            hoja['Y' + fila_sig] = fecha_fin
+            hoja['AA' + fila] = ('StartDate=' + fecha_init_limpia + '#Duration=' + str(items.durac) +
+                                 '#InvoiceInterval=Yearly#InvoiceMode=anticipated')
+            hoja['AA' + fila_sig] = ('StartDate=' + fecha_init_limpia + '#Duration=' + str(items.durac) +
+                                     '#InvoiceInterval=Yearly#InvoiceMode=anticipated')
+
+            hoja['AF' + fila] = items.tech
+            hoja['AF' + fila_sig] = items.tech
+            hoja['AG' + fila] = items.sn
+            hoja['AG' + fila_sig] = items.sn
+            curr_row += 2
+
+            if not only_maint:  # Si hay productos, saltamos 3 filas en curr_row
+                curr_row += 1
             num_fila += 10
 
         nombre_fichero_salida_exc = str(bid) + '_'+ fabr + '.xlsx'
