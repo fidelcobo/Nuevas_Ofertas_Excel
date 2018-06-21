@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>424</width>
-    <height>321</height>
+    <height>346</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -187,6 +187,27 @@ background-color: qconicalgradient(cx:0.8125, cy:0.761, angle:0, stop:0 rgba(191
    </property>
    <property name="text">
     <string>Procesar sólo mantenimientos</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="version">
+   <property name="geometry">
+    <rect>
+     <x>290</x>
+     <y>305</y>
+     <width>111</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <italic>true</italic>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color:rgb(0, 85, 255)</string>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>

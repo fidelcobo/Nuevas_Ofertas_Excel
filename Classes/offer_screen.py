@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Dialog(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("Dialog")
-        Dialog.resize(424, 321)
+        Dialog.resize(424, 346)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/Alien.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         Dialog.setWindowIcon(icon)
@@ -76,6 +76,14 @@ class Ui_Dialog(object):
         self.solo_mantenimiento.setFont(font)
         self.solo_mantenimiento.setStyleSheet("color:rgb(170, 0, 0)")
         self.solo_mantenimiento.setObjectName("solo_mantenimiento")
+        self.version = QtWidgets.QLabel(Dialog)
+        self.version.setGeometry(QtCore.QRect(290, 305, 111, 21))
+        font = QtGui.QFont()
+        font.setItalic(True)
+        self.version.setFont(font)
+        self.version.setStyleSheet("color:rgb(0, 85, 255)")
+        self.version.setText("")
+        self.version.setObjectName("version")
 
         self.retranslateUi(Dialog)
         QtCore.QMetaObject.connectSlotsByName(Dialog)

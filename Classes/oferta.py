@@ -2,6 +2,7 @@ from PyQt5 import QtWidgets
 from Classes.offer_screen import Ui_Dialog
 from Classes.articulo import Articulo
 from constantes import HEADERS_ROW, FIRST_ROW, BID_CELL, CURRENCY_CELL
+from version import VERSION
 from auxiliar import get_ultima_fila, busca_columnas, fill_offer
 
 import openpyxl
@@ -30,16 +31,18 @@ class Offer(QtWidgets.QDialog, Ui_Dialog):
         # Operaciones de pulsación de botones
         self.browse_Button.clicked.connect(self.buscar_fichero_oferta)
         self.ok_button.clicked.connect(self.procesar_oferta)
+        self.version.setText(VERSION)
 
     def buscar_fichero_oferta(self):
 
         # Abre el explorador Windows para que el usuario seleccione la oferta
-        direct = QtWidgets.QFileDialog.getOpenFileName(self, "Elegir archivo de oferta")
-        print(direct[0])
-        self.fichero_oferta.setText(direct[0])
+        file_offer = QtWidgets.QFileDialog.getOpenFileName(self, "Elegir archivo de oferta")
+        print(file_offer[0])
+        self.fichero_oferta.setText(file_offer[0])
 
     def extraer_articulos(self, file_offer, only_maint):
         """
+        
         Abre el fichero de oferta y extrae los datos en una lista de objetos Articulo
         :param file_offer:
         :return: lista_articulos .Lista de objetos clase Articulo, bid: Nombre de la oferta; moneda: moneda de la oferta
@@ -89,13 +92,14 @@ class Offer(QtWidgets.QDialog, Ui_Dialog):
                 list_price_prod = sheet[list_price_prod_col + str(x)].value
                 cost_prod = sheet[cost_prod_col + str(x)].value
                 venta_prod = sheet[venta_prod_col + str(x)].value
+
                 if sheet[manten_col + str(x)].value == 'Sí':
                     manten = True
                 else:
                     manten = False
 
-                if only_maint:  # Si Procesar sólo mantenimiento, da igual lo que haya en el campo Mantenimiento de Excel
-                    manten = True
+                # if only_maint:  # Si Procesar sólo mantenimiento, da igual lo que haya en el campo Mantenimiento de Excel
+                #      manten = True
 
                 init_date = sheet[init_date_col + str(x)].value
                 end_date = sheet[end_date_col + str(x)].value
