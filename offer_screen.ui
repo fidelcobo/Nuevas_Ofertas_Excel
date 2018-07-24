@@ -147,26 +147,6 @@ background-color: qconicalgradient(cx:0.8125, cy:0.761, angle:0, stop:0 rgba(191
      <height>41</height>
     </rect>
    </property>
-   <widget class="QWidget" name="widget_2" native="true">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>101</width>
-      <height>41</height>
-     </rect>
-    </property>
-   </widget>
-  </widget>
-  <widget class="QWidget" name="widget_3" native="true">
-   <property name="geometry">
-    <rect>
-     <x>260</x>
-     <y>230</y>
-     <width>101</width>
-     <height>41</height>
-    </rect>
-   </property>
   </widget>
   <widget class="QRadioButton" name="solo_mantenimiento">
    <property name="geometry">

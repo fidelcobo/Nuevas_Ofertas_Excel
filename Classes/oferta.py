@@ -42,7 +42,7 @@ class Offer(QtWidgets.QDialog, Ui_Dialog):
 
     def extraer_articulos(self, file_offer, only_maint):
         """
-        
+
         Abre el fichero de oferta y extrae los datos en una lista de objetos Articulo
         :param file_offer:
         :return: lista_articulos .Lista de objetos clase Articulo, bid: Nombre de la oferta; moneda: moneda de la oferta
