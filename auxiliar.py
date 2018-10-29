@@ -96,7 +96,7 @@ def hacer_oferta_csv(fabr:str, lista:list, directorio, bid:str, only_maint, mone
                 hoja['O' + fila] = locale.format('%10.2f',items.list_price_back)
                 hoja['O' + fila_sig] = locale.format('%10.2f',items.list_price_back)
                 hoja['P' + fila] = locale.format('%10.2f', float(items.venta_mant * items.durac/12))
-                hoja['P' + fila_sig] = locale.format('%10.2f', items.list_price_back)
+                hoja['P' + fila_sig] = locale.format('%10.2f', float(1.25 * (items.coste_unit_back * items.durac/12)))
                 hoja['Q' + fila] = locale.format('%10.2f', float(items.cost_unit_manten * items.durac/12))
                 hoja['Q' + fila_sig] = locale.format('%10.2f', float(items.coste_unit_back * items.durac/12))
                 fecha_init = '{}/{}/{}'.format(items.init_date.day, items.init_date.month,
